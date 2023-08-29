@@ -12,10 +12,13 @@ packer {
   }
 }
 
+# -------------------------------------------------
+
 locals {
-  pm_api_token_id     = vault("secret/proxmox/api_token_id", "value")
-  pm_api_token_secret = vault("secret/proxmox/api_token_secret", "value")
-  pm_api_url          = "https://10.0.1.10:8006/api2/json"
+  pm_api_token_id        = vault("secret/proxmox/api_token_id", "value")
+  pm_api_token_secret    = vault("secret/proxmox/api_token_secret", "value")
+  template_user_password = vault("secret/proxmox/ubuntu_template_vm_user", "value")
+  pm_api_url             = "https://10.0.1.10:8006/api2/json"
 }
 
 variable "ubuntu_release" {
@@ -34,6 +37,8 @@ variable "http_directory" {
   type    = string
   default = "ubuntu-init"
 }
+
+# -------------------------------------------------
 
 source "proxmox-iso" "ubuntu-generic" {
   boot_wait = "10s"
@@ -65,12 +70,15 @@ source "proxmox-iso" "ubuntu-generic" {
   iso_checksum     = var.iso_hash
   unmount_iso      = true
 
+  ssh_username = "ubuntu"
+  ssh_password = local.template_user_password
+
   cloud_init = true
 
   node                     = "hv"
   proxmox_url              = local.pm_api_url
   username                 = local.pm_api_token_id
-  password                 = local.pm_api_token_secret
+  token                    = local.pm_api_token_secret
   insecure_skip_tls_verify = true
 
   template_name        = "ubuntu-server-generic-${var.ubuntu_release}"

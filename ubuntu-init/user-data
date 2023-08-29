@@ -7,7 +7,12 @@ autoinstall:
     keyboard:
         layout: de
         variant: ch
-    packages: [open-vm-tools, openssh-server, net-tools, ntp, curl, vim, ifupdown, zip, unzip, gnupg2, software-properties-common, apt-transport-https, ca-certificates, lsb-release, python3-pip, jq]
+    packages: [
+        open-vm-tools, openssh-server, net-tools, ntp,
+        curl, vim, ifupdown, zip, unzip, qemu-guest-agent,
+        gnupg2, software-properties-common, apt-transport-https,
+        ca-certificates, lsb-release, python3-pip, jq
+    ]
     network:
         network:
             version: 2
@@ -17,7 +22,7 @@ autoinstall:
     identity:
         hostname: ubuntu-template
         username: ubuntu
-        password: "$6$rounds=4096$ntlX/dlo6b$HXaLN4RcLIGaEDdQdR2VTYi9pslSeXWL131MqaakqE285Nv0kW9KRontQYivCbycZerUMcjVsuLl2V8bbdadI1"
+        password: "$6$rounds=4096$bIglJee7Pb/ECaF8$s2gTLxl.O4fQsd.cU5QpRJmTFQIKOZfiPRa1ddUh1qdnIs.B.kF/5nbUBPplfbPd1/8qfBca3Lj01/D3l74Ei."
         # CHANGEME
     ssh:
         install-server: yes

@@ -56,6 +56,7 @@ source "proxmox-iso" "ubuntu-generic" {
     storage_pool = "vms"
     type         = "scsi"
   }
+  cloud_init = true
 
   network_adapters {
     bridge = "vmbr0"
@@ -73,8 +74,6 @@ source "proxmox-iso" "ubuntu-generic" {
   ssh_username = "ubuntu"
   ssh_password = local.template_user_password
 
-  cloud_init = true
-
   node                     = "hv"
   proxmox_url              = local.pm_api_url
   username                 = local.pm_api_token_id
@@ -83,6 +82,7 @@ source "proxmox-iso" "ubuntu-generic" {
 
   template_name        = "ubuntu-server-generic-${var.ubuntu_release}"
   template_description = "Generated on ${timestamp()}"
+  task_timeout = "10m"
 }
 
 build {

@@ -35,7 +35,7 @@ variable "iso_hash" {
 
 variable "http_directory" {
   type    = string
-  default = "ubuntu-22.04-live-server-amd64" #"ubuntu-init"
+  default = "ubuntu-init"
 }
 
 # -------------------------------------------------
@@ -45,10 +45,15 @@ source "proxmox-iso" "ubuntu-generic" {
 
   # TODO: https://askubuntu.com/a/1425813
   boot_command = [
-    "e<down><down><down><end>",
-    " autoinstall cloud-config-url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/user-data<wait>",
-    " ds='nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'",
-    "<F10>"
+    #"e<down><down><down><end>",
+    #" autoinstall cloud-config-url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/user-data<wait>",
+    #" ds='nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'<wait10>",
+    #"<F10>"
+    ## No working init found, try passing init= to kernel
+    
+    "<enter><wait5><enter><wait20><f6><wait5><esc><wait>",
+    "autoinstall ds=nocloud-net;s=http://{{.HTTPIP}}:{{.HTTPPort}}/",
+    "<enter>"
   ]
 
   disks {
@@ -64,6 +69,7 @@ source "proxmox-iso" "ubuntu-generic" {
   }
 
   http_directory = var.http_directory
+  vm_id = 900 
 
   iso_url          = "https://releases.ubuntu.com/jammy/${var.ubuntu_release_full}.iso"
   iso_storage_pool = "local"

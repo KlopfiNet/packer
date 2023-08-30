@@ -2,7 +2,7 @@
 
 ## Usage
 ```bash
-export ISO_CHECKSUM=...
+export ISO_CHECKSUM="sha256:a4acfda10b18da50e2ec50ccaf860d7f20b389df8765611142305c0e911d16fd"
 if [ "$ISO_CHECKSUM" == "none" ]; then
     # Check if target ISO already exists - required as checksum is set to "none"
     bash launch.sh
@@ -13,6 +13,7 @@ export VAULT_ADDR=http://10.0.1.152:8200
 vault login
 export VAULT_TOKEN=$(vault token create -policy="default" -period=4h | awk '$1 == "token" { print $2 }')
 
-packer init
-packer build main.pkr.hcl
+TEMPLATE=main.pkr.hcl
+packer init $TEMPLATE
+packer build -var "iso_hash=$ISO_CHECKSUM" $TEMPLATE
 ```

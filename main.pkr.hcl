@@ -23,11 +23,11 @@ locals {
 
 variable "ubuntu_release_full" {
   type    = string
-  default = "22.04.3"
+  default = "ubuntu-22.04.3-live-server-amd64"
 }
 
 variable "iso_hash" {
-  type    = string
+  type = string
   # Prefix with sha256:<hash>
   # If set to 'none', execute pre-flight script first
   # https://developer.hashicorp.com/packer/plugins/builders/proxmox/iso#iso_checksum
@@ -80,9 +80,9 @@ source "proxmox-iso" "ubuntu-generic" {
   token                    = local.pm_api_token_secret
   insecure_skip_tls_verify = true
 
-  template_name        = "ubuntu-server-generic-${var.ubuntu_release}"
-  template_description = "Generated on ${timestamp()}"
-  task_timeout = "10m"
+  template_name        = "ubuntu-server-generic"
+  template_description = "${var.ubuntu_release_full} - Generated on ${timestamp()}"
+  task_timeout         = "10m"
 }
 
 build {

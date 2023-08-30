@@ -21,35 +21,35 @@ locals {
   pm_api_url             = "https://10.0.1.10:8006/api2/json"
 }
 
-variable "ubuntu_release" {
+variable "ubuntu_release_full" {
   type    = string
   default = "22.04.3"
 }
 
 variable "iso_hash" {
   type    = string
-  default = "none"
   # Prefix with sha256:<hash>
+  # If set to 'none', execute pre-flight script first
   # https://developer.hashicorp.com/packer/plugins/builders/proxmox/iso#iso_checksum
 }
 
 variable "http_directory" {
   type    = string
-  default = "ubuntu-init"
+  default = "ubuntu-22.04-live-server-amd64" #"ubuntu-init"
 }
 
 # -------------------------------------------------
 
 source "proxmox-iso" "ubuntu-generic" {
-  boot_wait = "10s"
+  boot_wait = "3s"
+
+  # TODO: https://askubuntu.com/a/1425813
   boot_command = [
-    # CD install
     "e<down><down><down><end>",
-    " autoinstall ds=nocloud;",
+    " autoinstall cloud-config-url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/user-data<wait>",
+    " ds='nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'",
     "<F10>"
   ]
-
-  # TODO: Find a way to get ubuntu-init data
 
   disks {
     disk_size    = "30G"
@@ -65,7 +65,7 @@ source "proxmox-iso" "ubuntu-generic" {
 
   http_directory = var.http_directory
 
-  iso_url          = "https://releases.ubuntu.com/jammy/ubuntu-${var.ubuntu_release}-live-server-amd64.iso"
+  iso_url          = "https://releases.ubuntu.com/jammy/${var.ubuntu_release_full}.iso"
   iso_storage_pool = "local"
   iso_download_pve = true
   iso_checksum     = var.iso_hash

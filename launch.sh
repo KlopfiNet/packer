@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bootstrap script for proxmox-iso builder
-# > Checks if a certain ISO already contains in specified datastore
-# > If yes, delete ISO as the builder will not overwrite the file
+# > If cheksum check is set to NONE, checks if a certain ISO is already stored in specified datastore
+# > If yes, delete said ISO as the builder will not overwrite the file
 
 set -e
 
@@ -14,6 +14,14 @@ GREEN='\e[32m'
 YELLOW='\e[33m'
 CYAN='\e[36m'
 NC='\e[0m'
+
+# --------------------------------------
+# Preflight checks
+if [ "$ISO_CHECKSUM" != "none" ]; then
+  #https://github.com/hashicorp/packer-plugin-proxmox/issues/179#issuecomment-1481602526
+  echo -e "${YELLOW}An ISO checksum has been provided, not cleansing image...${NC}"
+  exit 0
+fi
 
 # It is expected that certain env vars are set
 if [[ -z "${PM_API_TOKEN_ID}" ]]; then

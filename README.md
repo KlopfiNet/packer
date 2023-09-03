@@ -14,7 +14,7 @@ export VAULT_TOKEN="$(vault token create -policy="proxmox" -ttl=4h | awk '$1 == 
 # Check if target ISO already exists - required as checksum is set to "none"
 bash pm_iso_prep.sh
 
-TEMPLATE=main.pkr.hcl
-#packer init $TEMPLATE
+TEMPLATE=ubuntu.pkr.hcl
+packer init $TEMPLATE
 packer build -var "iso_hash=$ISO_CHECKSUM" $TEMPLATE
 ```

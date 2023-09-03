@@ -1,39 +1,31 @@
+#cloud-config
 autoinstall:
-    version: 1
-    early-commands:
-        # workaround to stop ssh for packer as it thinks it timed out
-        - sudo systemctl stop ssh
-    locale: en_US
-    keyboard:
-        layout: de
-        variant: ch
-    packages: [
+  version: 1
+  locale: en_US
+  keyboard:
+    layout: ch
+  ssh:
+    install-server: true
+    allow-pw: true
+  packages: [
         open-vm-tools, openssh-server, net-tools, ntp,
         curl, vim, ifupdown, zip, unzip, qemu-guest-agent,
         gnupg2, software-properties-common, apt-transport-https,
         ca-certificates, lsb-release, python3-pip, jq
     ]
-    network:
-        network:
-            version: 2
-            ethernets:
-                eth0:
-                    dhcp4: true
-    identity:
-        hostname: ubuntu-template
-        username: ubuntu
-        password: "$6$rounds=4096$bIglJee7Pb/ECaF8$s2gTLxl.O4fQsd.cU5QpRJmTFQIKOZfiPRa1ddUh1qdnIs.B.kF/5nbUBPplfbPd1/8qfBca3Lj01/D3l74Ei."
-        # CHANGEME
-    ssh:
-        install-server: yes
-        allow-pw: no
-        authorized-keys:
-            - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE1bK1B+UjeGN4Si3wA3kUTCgr5/wASP5KL50EhDSRrZ
-    storage:
-        layout:
-            name: lvm
-    user-data:
-        disable_root: false
-    late-commands:
-        - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
-        - curtin in-target --target=/target -- chmod 440 /etc/sudoers.d/ubuntu
+  storage:
+    layout:
+      name: lvm
+    swap:
+      size: 0
+  user-data:
+    package_upgrade: true
+    timezone: Europe/Zurich
+    users:
+      - name: ubuntu
+        passwd: $6$rounds=4096$bIglJee7Pb/ECaF8$s2gTLxl.O4fQsd.cU5QpRJmTFQIKOZfiPRa1ddUh1qdnIs.B.kF/5nbUBPplfbPd1/8qfBca3Lj01/D3l74Ei.
+        lock-passwd: false
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+        ssh_authorized_keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJEXrziuUOCpWPvwOsGuF4K+aq1ufToGMi4ra/1omOZb

@@ -7,6 +7,14 @@ autoinstall:
   ssh:
     install-server: true
     allow-pw: true
+  network:
+    network:
+      version: 2
+      renderer: networkd
+      ethernets:
+        eth0:
+          dhcp4: true
+          optional: true
   packages: [
         open-vm-tools, openssh-server, net-tools, ntp,
         curl, vim, ifupdown, zip, unzip, qemu-guest-agent,

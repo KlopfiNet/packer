@@ -65,7 +65,7 @@ jobs:
         PM_API_TOKEN_ID="${{ steps.import-secrets.outputs.PM_API_TOKEN_ID }}"
         PM_API_TOKEN_PASS="${{ steps.import-secrets.outputs.PM_API_TOKEN_PASS }}"
 
-        bash launch.sh
+        bash pm_iso_prep.sh
 
     - name: Pack
       run: |

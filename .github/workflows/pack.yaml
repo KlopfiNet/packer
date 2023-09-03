@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '**/*.pkr.hcl'
+      - 'ubuntu-init/**'
   pull_request:
     branches:
       - main
@@ -39,7 +42,7 @@ jobs:
         url: ${{ vars.VAULT_ADDR }}
         token: ${{ env.VAULT_TOKEN }}
         secrets: |
-          secret/proxmox/api_token_id value | PM_API_TOKEN_ID
+          secret/proxmox/api_token_id value | PM_API_TOKEN_ID ;
           secret/proxmox/api_token_secret value | PM_API_TOKEN_PASS
 
     - name: Get ISO hash

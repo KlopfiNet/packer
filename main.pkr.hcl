@@ -48,7 +48,7 @@ source "proxmox-iso" "ubuntu-generic" {
     "c",
     "linux /casper/vmlinuz --- autoinstall ds='nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/' ",
     "<enter><wait>",
-    "initrd /casper/initrd<enter><wait>",
+    "initrd /casper/initrd<enter>",
     "boot<enter>"
   ]
 
@@ -57,7 +57,7 @@ source "proxmox-iso" "ubuntu-generic" {
     storage_pool = "vms"
     type         = "scsi"
   }
-  cloud_init = true
+  #cloud_init = true
 
   memory = 1024
   # Required, as packer only supplements 512MB by default, leading to kernel panics
@@ -78,6 +78,7 @@ source "proxmox-iso" "ubuntu-generic" {
 
   ssh_username = "ubuntu"
   ssh_password = local.template_user_password
+  ssh_timeout  = "20m"
 
   node                     = "hv"
   proxmox_url              = local.pm_api_url
@@ -92,4 +93,10 @@ source "proxmox-iso" "ubuntu-generic" {
 
 build {
   sources = ["source.proxmox-iso.ubuntu-generic"]
+
+  provisioner "shell" {
+    inline = [
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo -n '.'; sleep 1; done"
+    ]
+  }
 }

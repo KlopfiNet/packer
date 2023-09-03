@@ -26,7 +26,7 @@ jobs:
 
     - name: Vault login
       run: |
-        vault login -method=github token="${{ secrets.GH_BOT_PAT }}
+        vault login -method=github token="${{ secrets.GH_BOT_PAT }}"
         TOKEN="$(vault token create -policy="proxmox" -ttl=4h | awk '$1 == "token" { print $2 }')"
         echo "VAULT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
 

@@ -11,7 +11,8 @@ fi
 export VAULT_ADDR=http://10.0.1.152:8200
 
 vault login
-export VAULT_TOKEN=$(vault token create -policy="default" -period=4h | awk '$1 == "token" { print $2 }')
+#export VAULT_TOKEN=$(vault token create -policy="proxmox" -period=4h | awk '$1 == "token" { print $2 }')
+export VAULT_TOKEN="$(vault token create -policy="proxmox" -ttl=5m | awk '$1 == "token" { print $2 }')"
 
 TEMPLATE=main.pkr.hcl
 packer init $TEMPLATE

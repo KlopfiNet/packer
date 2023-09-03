@@ -2,9 +2,11 @@ name: Pack ubuntu template
 
 on:
   push:
-    branches: [ $default-branch ]
+    branches:
+      - main
   pull_request:
-    branches: [ $default-branch ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -26,7 +28,7 @@ jobs:
 
     - name: Vault login
       run: |
-        vault login -method=github token="${{ secrets.GH_BOT_PAT }}" -no-print
+        vault login -no-print -method=github token="${{ secrets.GH_BOT_PAT }}"
         TOKEN="$(vault token create -policy="proxmox" -ttl=1h | awk '$1 == "token" { print $2 }')"
         echo "VAULT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
 

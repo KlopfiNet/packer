@@ -14,7 +14,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Vault setup
+    - name: Setup `vault`
       uses: eLco/setup-vault@v1
 
     - name: Setup `packer`
@@ -26,14 +26,19 @@ jobs:
 
     - name: Vault login
       run: |
-        vault login -method=github token="${{ secrets.GH_BOT_PAT }}"
-        TOKEN="$(vault token create -policy="proxmox" -ttl=4h | awk '$1 == "token" { print $2 }')"
+        vault login -method=github token="${{ secrets.GH_BOT_PAT }}" -no-print
+        TOKEN="$(vault token create -policy="proxmox" -ttl=1h | awk '$1 == "token" { print $2 }')"
         echo "VAULT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
 
     - name: Vault secrets
-      run: |
-        echo "PM_API_TOKEN_ID=$(vault kv get -mount=secret -field=value proxmox/api_token_id)" >> "$GITHUB_ENV"
-        echo "PM_API_TOKEN_PASS=$(vault kv get -mount=secret -field=value proxmox/api_token_secret)" >> "$GITHUB_ENV"
+      id: import-secrets
+      uses: hashicorp/vault-action@v2
+      with:
+        url: ${{ vars.VAULT_ADDR }}
+        token: ${{ env.VAULT_TOKEN }}
+        secrets: |
+          secret/proxmox/api_token_id value | PM_API_TOKEN_ID
+          secret/proxmox/api_token_secret value | PM_API_TOKEN_PASS
 
     - name: Get ISO hash
       run: |
@@ -50,7 +55,12 @@ jobs:
         echo "Got checksum: $(tail $GITHUB_ENV -n 1)"
     
     - name: Proxmox ISO prep
-      run: bash launch.sh
+      run: |
+        # Set env vars for step only
+        PM_API_TOKEN_ID="${{ steps.import-secrets.outputs.PM_API_TOKEN_ID }}"
+        PM_API_TOKEN_PASS="${{ steps.import-secrets.outputs.PM_API_TOKEN_PASS }}"
+
+        bash launch.sh
 
     - name: Pack
       run: |

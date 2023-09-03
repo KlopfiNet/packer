@@ -45,15 +45,11 @@ source "proxmox-iso" "ubuntu-generic" {
 
   # TODO: https://askubuntu.com/a/1425813
   boot_command = [
-    #"e<down><down><down><end>",
-    #" autoinstall cloud-config-url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/user-data<wait>",
-    #" ds='nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/'<wait10>",
-    #"<F10>"
-    ## No working init found, try passing init= to kernel
-    
-    "<enter><wait5><enter><wait20><f6><wait5><esc><wait>",
-    "autoinstall ds=nocloud-net;s=http://{{.HTTPIP}}:{{.HTTPPort}}/",
-    "<enter>"
+    "c",
+    "linux /casper/vmlinuz --- autoinstall ds='nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/' ",
+    "<enter><wait>",
+    "initrd /casper/initrd<enter><wait>",
+    "boot<enter>"
   ]
 
   disks {
@@ -63,13 +59,16 @@ source "proxmox-iso" "ubuntu-generic" {
   }
   cloud_init = true
 
+  memory = 1024
+  # Required, as packer only supplements 512MB by default, leading to kernel panics
+
   network_adapters {
     bridge = "vmbr0"
     model  = "virtio"
   }
 
   http_directory = var.http_directory
-  vm_id = 900 
+  vm_id          = 900
 
   iso_url          = "https://releases.ubuntu.com/jammy/${var.ubuntu_release_full}.iso"
   iso_storage_pool = "local"

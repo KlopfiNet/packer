@@ -1,0 +1,54 @@
+name: Pack ubuntu template
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+  workflow_dispatch:
+
+jobs:
+  pack:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Vault setup
+      uses: eLco/setup-vault@v1
+
+    - name: Setup `packer`
+      uses: hashicorp/setup-packer@main
+      
+    - name: Set env vars
+      run: |
+        echo "VAULT_ADDR=${{ vars.VAULT_ADDR }}" >> "$GITHUB_ENV"
+
+    - name: Vault login
+      run: |
+        vault login -method=github token="${{ secrets.GH_BOT_PAT }}
+        TOKEN="$(vault token create -policy="proxmox" -ttl=4h | awk '$1 == "token" { print $2 }')"
+        echo "VAULT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+
+    - name: Get ISO hash
+      run: |
+        curl -o SHA256SUMS https://releases.ubuntu.com/jammy/SHA256SUMS
+
+        # Extract the SHA256 checksum
+        checksum=$(grep "live-server" SHA256SUMS  | awk '{print $1}')
+        if [ -n "$checksum" ]; then
+          echo "ISO_CHECKSUM=$checksum" >> $GITHUB_ENV
+        else
+          echo "ISO_CHECKSUM=none" >> $GITHUB_ENV
+        fi
+
+        echo "Got checksum: $(tail $GITHUB_ENV -n 1)"
+    
+    - name: Proxmox ISO prep
+      run: bash launch.sh
+
+    - name: Pack
+      run: |
+        TEMPLATE="ubuntu.pkr.hcl"
+        packer init ./$TEMPLATE
+        packer build -force -var "iso_hash=$ISO_CHECKSUM" ./$TEMPLATE

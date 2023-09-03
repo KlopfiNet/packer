@@ -30,6 +30,11 @@ jobs:
         TOKEN="$(vault token create -policy="proxmox" -ttl=4h | awk '$1 == "token" { print $2 }')"
         echo "VAULT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
 
+    - name: Vault secrets
+      run: |
+        echo "PM_API_TOKEN_ID=$(vault kv get -mount=secret -field=value proxmox/api_token_id)" >> "$GITHUB_ENV"
+        echo "PM_API_TOKEN_PASS=$(vault kv get -mount=secret -field=value proxmox/api_token_secret)" >> "$GITHUB_ENV"
+
     - name: Get ISO hash
       run: |
         curl -o SHA256SUMS https://releases.ubuntu.com/jammy/SHA256SUMS

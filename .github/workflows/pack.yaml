@@ -28,6 +28,7 @@ jobs:
     - name: Set env vars
       run: |
         echo "VAULT_ADDR=${{ vars.VAULT_ADDR }}" >> "$GITHUB_ENV"
+        echo "WATCHER_ID=$RANDOM" >> "$GITHUB_ENV"
 
     - name: Vault login
       run: |
@@ -58,6 +59,11 @@ jobs:
         fi
 
         echo "Got checksum: $(tail $GITHUB_ENV -n 1)"
+
+    - name: Start proxmox watcher
+      id: start-watcher
+      run: |
+        /opt/powershell/pwsh -nologo -noprofile worfklow-scripts/start_watcher.ps1 ${{ vars.VM_WATCHER_HOST }} ${{ vars.PACKER_VM_TEMPLATE_ID }}
     
     - name: Proxmox ISO prep
       run: |
@@ -68,7 +74,15 @@ jobs:
         bash pm_iso_prep.sh
 
     - name: Pack
+      id: pack-image
       run: |
         TEMPLATE="ubuntu.pkr.hcl"
         packer init ./$TEMPLATE
         packer build -force -var "iso_hash=$ISO_CHECKSUM" ./$TEMPLATE
+    
+    # Stop/destroy watcher
+    - name: Mutate watcher
+      if: always()
+      run: |
+        /opt/powershell/pwsh -nologo -noprofile worfklow-scripts/mutate_watcher.ps1 ${{ vars.VM_WATCHER_HOST }} ${{ steps.start-watcher.outputs.WATCHER_ACTIVE }} ${{ steps.pack-image.outcome }}
+        

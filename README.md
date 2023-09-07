@@ -18,3 +18,6 @@ TEMPLATE=ubuntu.pkr.hcl
 packer init $TEMPLATE
 packer build -var "iso_hash=$ISO_CHECKSUM" $TEMPLATE
 ```
+
+## Notes
+The self-hosted runner must have PowerShell installed at `/opt/powershell/`.

@@ -87,5 +87,5 @@ jobs:
     - name: Mutate watcher
       if: always()
       run: |
-        /opt/powershell/pwsh -nologo -noprofile -file "./workflow-scripts/mutate_watcher.ps1" "${{ vars.VM_WATCHER_HOST }}" "${{ steps.start-watcher.outputs.WATCHER_ACTIVE }}" "${{ steps.pack-image.outcome }}"
+        /opt/powershell/pwsh -nologo -noprofile -file "./workflow-scripts/mutate_watcher.ps1" "${{ vars.VM_WATCHER_HOST }}" ${{ steps.start-watcher.outputs.WATCHER_ACTIVE }} "${{ steps.pack-image.outcome }}"
         

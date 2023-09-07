@@ -59,10 +59,7 @@ jobs:
         fi
 
         echo "Got checksum: $(tail $GITHUB_ENV -n 1)"
-
-    - name: "DEBUG: List files"
-      run: ls -al
-
+        
     - name: Start proxmox watcher
       id: start-watcher
       run: |

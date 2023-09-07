@@ -59,9 +59,10 @@ jobs:
         fi
 
         echo "Got checksum: $(tail $GITHUB_ENV -n 1)"
-        
+
     - name: Start proxmox watcher
       id: start-watcher
+      shell: pwsh
       run: |
         /opt/powershell/pwsh -nologo -noprofile -file "./workflow-scripts/start_watcher.ps1" "${{ vars.VM_WATCHER_HOST }}" "${{ vars.PACKER_VM_TEMPLATE_ID }}"
     
@@ -83,6 +84,7 @@ jobs:
     # Stop/destroy watcher
     - name: Mutate watcher
       if: always()
+      shell: pwsh
       run: |
         /opt/powershell/pwsh -nologo -noprofile -file "./workflow-scripts/mutate_watcher.ps1" "${{ vars.VM_WATCHER_HOST }}" ${{ steps.start-watcher.outputs.WATCHER_ACTIVE }} "${{ steps.pack-image.outcome }}"
         

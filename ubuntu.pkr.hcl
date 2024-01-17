@@ -41,14 +41,12 @@ variable "http_directory" {
 # -------------------------------------------------
 
 source "proxmox-iso" "ubuntu-generic" {
-  boot_wait = "3s"
-
-  # TODO: https://askubuntu.com/a/1425813
+  boot_wait = "5s"
   boot_command = [
-    "c",
-    "linux /casper/vmlinuz --- autoinstall ds='nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/' ",
+    "c<wait>",
+    "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{.HTTPIP}}:{{.HTTPPort}}/\"<wait>",
     "<enter><wait>",
-    "initrd /casper/initrd<enter>",
+    "initrd /casper/initrd<enter><wait>",
     "boot<enter>"
   ]
 
@@ -59,7 +57,7 @@ source "proxmox-iso" "ubuntu-generic" {
   }
   #cloud_init = true
 
-  memory = 1024
+  memory = 1536 #1024
   # Required, as packer only supplements 512MB by default, leading to kernel panics
 
   network_adapters {
@@ -68,7 +66,7 @@ source "proxmox-iso" "ubuntu-generic" {
   }
 
   http_directory = var.http_directory
-  vm_id          = 900
+  vm_id          = 10311
 
   iso_url          = "https://releases.ubuntu.com/jammy/${var.ubuntu_release_full}.iso"
   iso_storage_pool = "local"
@@ -76,7 +74,7 @@ source "proxmox-iso" "ubuntu-generic" {
   iso_checksum     = var.iso_hash
   unmount_iso      = true
 
-  ssh_username = "ubuntu"
+  ssh_username = "ansible"
   ssh_password = local.template_user_password
   ssh_timeout  = "20m"
 

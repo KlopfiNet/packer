@@ -14,7 +14,7 @@ on:
 
 jobs:
   pack:
-    runs-on: self-hosted
+    runs-on: rpi
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -62,6 +62,7 @@ jobs:
 
     - name: Start proxmox watcher
       id: start-watcher
+      continue-on-error: true
       shell: pwsh
       run: |
         /opt/powershell/pwsh -nologo -noprofile -file "./workflow-scripts/start_watcher.ps1" "${{ vars.VM_WATCHER_HOST }}" "${{ vars.PACKER_VM_TEMPLATE_ID }}"
@@ -83,7 +84,7 @@ jobs:
     
     # Stop/destroy watcher
     - name: Mutate watcher
-      if: always()
+      if: steps.start-watcher.outcome == 'success'
       shell: pwsh
       run: |
         /opt/powershell/pwsh -nologo -noprofile -file "./workflow-scripts/mutate_watcher.ps1" "${{ vars.VM_WATCHER_HOST }}" ${{ steps.start-watcher.outputs.WATCHER_ACTIVE }} "${{ steps.pack-image.outcome }}"

@@ -8,18 +8,20 @@ autoinstall:
     install-server: true
     allow-pw: true
   network:
-    network:
-      version: 2
-      renderer: networkd
-      ethernets:
-        eth0:
-          dhcp4: true
-          optional: true
+    version: 2
+    renderer: networkd
+    ethernets:
+      ens18:
+        dhcp4: true
+        nameservers:
+          addresses:
+            - 10.0.1.20
+            - 1.1.1.1
   packages: [
-        open-vm-tools, openssh-server, net-tools, ntp,
-        curl, vim, ifupdown, zip, unzip, qemu-guest-agent,
-        gnupg2, software-properties-common, apt-transport-https,
-        ca-certificates, lsb-release, python3-pip, jq
+      open-vm-tools, openssh-server, net-tools, ntp,
+      curl, vim, ifupdown, zip, unzip, qemu-guest-agent,
+      gnupg2, software-properties-common, apt-transport-https,
+      ca-certificates, lsb-release, python3-pip, jq, micro, bat
     ]
   storage:
     layout:
@@ -30,10 +32,10 @@ autoinstall:
     package_upgrade: true
     timezone: Europe/Zurich
     users:
-      - name: ubuntu
+      - name: ansible
         passwd: $6$rounds=4096$bIglJee7Pb/ECaF8$s2gTLxl.O4fQsd.cU5QpRJmTFQIKOZfiPRa1ddUh1qdnIs.B.kF/5nbUBPplfbPd1/8qfBca3Lj01/D3l74Ei.
         lock-passwd: false
         sudo: ALL=(ALL) NOPASSWD:ALL
         shell: /bin/bash
         ssh_authorized_keys:
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJEXrziuUOCpWPvwOsGuF4K+aq1ufToGMi4ra/1omOZb
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGEch+fpr62X3Lb4qvEREysIHnhB6nrdZKbzWF/OSIri

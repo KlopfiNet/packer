@@ -97,4 +97,8 @@ build {
       "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo -n '.'; sleep 1; done"
     ]
   }
+
+  provisioner "ansible" {
+    playbook_file = "./playbooks/provision.yml"
+  }
 }

@@ -29,14 +29,14 @@ jobs:
 
     - name: Vault secrets
       id: import-secrets
-      uses: hashicorp/vault-action@v2
+      uses: hashicorp/vault-action@v3
       with:
         url: ${{ vars.VAULT_ADDR }}
         method: kubernetes
         role: ghactions
         secrets: |
-          secret/proxmox/api_token_id value | PM_API_TOKEN_ID ;
-          secret/proxmox/api_token_secret value | PM_API_TOKEN_PASS
+          secret/data/proxmox/api_token_id value | PM_API_TOKEN_ID ;
+          secret/data/proxmox/api_token_secret value | PM_API_TOKEN_PASS
 
     - name: Get ISO hash
       run: |

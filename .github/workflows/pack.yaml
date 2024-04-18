@@ -14,13 +14,10 @@ on:
 
 jobs:
   pack:
-    runs-on: rpi
+    runs-on: kubernetes
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
-    - name: Setup `vault`
-      uses: eLco/setup-vault@v1
 
     - name: Setup `packer`
       uses: hashicorp/setup-packer@main
@@ -30,18 +27,13 @@ jobs:
         echo "VAULT_ADDR=${{ vars.VAULT_ADDR }}" >> "$GITHUB_ENV"
         echo "WATCHER_ID=$RANDOM" >> "$GITHUB_ENV"
 
-    - name: Vault login
-      run: |
-        vault login -no-print -method=github token="${{ secrets.GH_BOT_PAT }}"
-        TOKEN="$(vault token create -policy="proxmox" -ttl=1h | awk '$1 == "token" { print $2 }')"
-        echo "VAULT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
-
     - name: Vault secrets
       id: import-secrets
       uses: hashicorp/vault-action@v2
       with:
         url: ${{ vars.VAULT_ADDR }}
-        token: ${{ env.VAULT_TOKEN }}
+        method: kubernetes
+        role: ghactions
         secrets: |
           secret/proxmox/api_token_id value | PM_API_TOKEN_ID ;
           secret/proxmox/api_token_secret value | PM_API_TOKEN_PASS
@@ -60,12 +52,12 @@ jobs:
 
         echo "Got checksum: $(tail $GITHUB_ENV -n 1)"
 
-    - name: Start proxmox watcher
-      id: start-watcher
-      continue-on-error: true
-      shell: pwsh
-      run: |
-        /opt/powershell/pwsh -nologo -noprofile -file "./workflow-scripts/start_watcher.ps1" "${{ vars.VM_WATCHER_HOST }}" "${{ vars.PACKER_VM_TEMPLATE_ID }}"
+#    - name: Start proxmox watcher
+#      id: start-watcher
+#      continue-on-error: true
+#      shell: pwsh
+#      run: |
+#        /opt/powershell/pwsh -nologo -noprofile -file "./workflow-scripts/start_watcher.ps1" "${{ vars.VM_WATCHER_HOST }}" "${{ vars.PACKER_VM_TEMPLATE_ID }}"
     
     - name: Proxmox ISO prep
       run: |
@@ -79,13 +71,13 @@ jobs:
       id: pack-image
       run: |
         TEMPLATE="ubuntu.pkr.hcl"
-        packer init ./$TEMPLATE
-        packer build -force -var "iso_hash=$ISO_CHECKSUM" ./$TEMPLATE
+        packer init ./templates/$TEMPLATE
+        packer build -force -var "iso_hash=$ISO_CHECKSUM" ./templates/$TEMPLATE
     
     # Stop/destroy watcher
-    - name: Mutate watcher
-      if: steps.start-watcher.outcome == 'success'
-      shell: pwsh
-      run: |
-        /opt/powershell/pwsh -nologo -noprofile -file "./workflow-scripts/mutate_watcher.ps1" "${{ vars.VM_WATCHER_HOST }}" ${{ steps.start-watcher.outputs.WATCHER_ACTIVE }} "${{ steps.pack-image.outcome }}"
+#    - name: Mutate watcher
+#      if: steps.start-watcher.outcome == 'success'
+#      shell: pwsh
+#      run: |
+#        /opt/powershell/pwsh -nologo -noprofile -file "./workflow-scripts/mutate_watcher.ps1" "${{ vars.VM_WATCHER_HOST }}" ${{ steps.start-watcher.outputs.WATCHER_ACTIVE }} "${{ steps.pack-image.outcome }}"
         

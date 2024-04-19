@@ -1,0 +1,26 @@
+- name: General provisioning
+  hosts: default
+  become: true
+  vars:
+    packages:
+      - micro
+      - bat
+      - jq
+      - curl
+      - git
+      - wget
+      - qemu-guest-agent
+      - python3-pip
+
+  tasks:
+  - name: Install packages
+    ansible.builtin.package:
+      name: "{{ item }}" 
+      state: present
+    with_items: "{{ packages }}"
+  
+  - name: Start and enable guest agent
+    ansible.builtin.service:
+      name: qemu-guest-agent
+      state: started
+      enabled: yes

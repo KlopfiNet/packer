@@ -40,7 +40,7 @@ variable "http_directory" {
 
 # -------------------------------------------------
 
-source "proxmox-iso" "ubuntu-generic" {
+source "proxmox-iso" "rocky-generic" {
   boot_wait = "5s"
   boot_command = [
     "c<wait>",

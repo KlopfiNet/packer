@@ -6,7 +6,7 @@ autoinstall:
     layout: ch
   ssh:
     install-server: true
-    allow-pw: true
+    allow-pw: false
   network:
     version: 2
     renderer: networkd
@@ -18,10 +18,7 @@ autoinstall:
             - 10.0.1.20
             - 1.1.1.1
   packages: [
-      open-vm-tools, openssh-server, net-tools, ntp,
-      curl, vim, ifupdown, zip, unzip, qemu-guest-agent,
-      gnupg2, software-properties-common, apt-transport-https,
-      ca-certificates, lsb-release, python3-pip, jq, micro, bat
+      openssh-server, qemu-guest-agent
     ]
   storage:
     layout:

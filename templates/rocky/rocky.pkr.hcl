@@ -3,39 +3,9 @@
 # REF:
 # https://tekanaid.com/posts/hashicorp-packer-build-ubuntu22-04-vmware
 
-packer {
-  required_plugins {
-    prxomox = {
-      version = ">= 1.1.3"
-      source  = "github.com/hashicorp/proxmox"
-    }
-  }
-}
-
-# -------------------------------------------------
-
-locals {
-  pm_api_token_id        = vault("secret/proxmox/api_token_id", "value")
-  pm_api_token_secret    = vault("secret/proxmox/api_token_secret", "value")
-  template_user_password = vault("secret/proxmox/ubuntu_template_vm_user", "value")
-  pm_api_url             = "https://10.0.1.10:8006/api2/json"
-}
-
-variable "ubuntu_release_full" {
-  type    = string
-  default = "ubuntu-22.04.3-live-server-amd64"
-}
-
 variable "iso_hash" {
-  type = string
-  # Prefix with sha256:<hash>
-  # If set to 'none', execute pre-flight script first
-  # https://developer.hashicorp.com/packer/plugins/builders/proxmox/iso#iso_checksum
-}
-
-variable "http_directory" {
   type    = string
-  default = "ubuntu-init"
+  default = "eb096f0518e310f722d5ebd4c69f0322df4fc152c6189f93c5c797dc25f3d2e1"
 }
 
 # -------------------------------------------------
@@ -43,19 +13,24 @@ variable "http_directory" {
 source "proxmox-iso" "rocky-generic" {
   boot_wait = "5s"
   boot_command = [
-    "c<wait>",
-    "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{.HTTPIP}}:{{.HTTPPort}}/\"<wait>",
-    "<enter><wait>",
-    "initrd /casper/initrd<enter><wait>",
-    "boot<enter>"
+    "e<down><down><end>",
+    "<bs><bs><bs><bs><bs>",
+    "inst.text inst.ks=cdrom:/ks.cfg",
+    "<leftCtrlOn>x<leftCtrlOff>"
   ]
+  
+  additional_iso_files {
+    iso_storage_pool = "local"
+    cd_files         = ["${path.root}/ks"]
+    cd_label         = "cidata"
+    unmount          = true
+  }
 
   disks {
     disk_size    = "30G"
     storage_pool = "vms"
     type         = "scsi"
   }
-  #cloud_init = true
 
   memory = 1536 #1024
   # Required, as packer only supplements 512MB by default, leading to kernel panics
@@ -65,32 +40,31 @@ source "proxmox-iso" "rocky-generic" {
     model  = "virtio"
   }
 
-  http_directory = var.http_directory
   vm_id          = 10311
 
-  iso_url          = "https://releases.ubuntu.com/jammy/${var.ubuntu_release_full}.iso"
+  iso_url          = "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.3-x86_64-boot.iso"
   iso_storage_pool = "local"
   iso_download_pve = true
   iso_checksum     = var.iso_hash
   unmount_iso      = true
 
   ssh_username = "ansible"
-  ssh_password = local.template_user_password
+  ssh_password = var.template_user_password
   ssh_timeout  = "20m"
 
   node                     = "hv"
-  proxmox_url              = local.pm_api_url
-  username                 = local.pm_api_token_id
-  token                    = local.pm_api_token_secret
+  proxmox_url              = var.pm_api_url
+  username                 = var.pm_api_token_id
+  token                    = var.pm_api_token_secret
   insecure_skip_tls_verify = true
 
-  template_name        = "ubuntu-server-generic"
-  template_description = "${var.ubuntu_release_full} - Generated on ${timestamp()}"
+  template_name        = "rocky-server-generic"
+  template_description = "Rocky 9.3 - Generated on ${timestamp()}"
   task_timeout         = "10m"
 }
 
 build {
-  sources = ["source.proxmox-iso.ubuntu-generic"]
+  sources = ["source.proxmox-iso.rocky-generic"]
 
   provisioner "shell" {
     inline = [
@@ -99,6 +73,6 @@ build {
   }
 
   provisioner "ansible" {
-    playbook_file = "./playbooks/provision.yml"
+    playbook_file = "${path.root}/../playbooks/provision.yaml"
   }
 }

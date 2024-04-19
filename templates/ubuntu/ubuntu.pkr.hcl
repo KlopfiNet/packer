@@ -3,22 +3,6 @@
 # REF:
 # https://tekanaid.com/posts/hashicorp-packer-build-ubuntu22-04-vmware
 
-packer {
-  required_plugins {
-    prxomox = {
-      version = ">= 1.1.3"
-      source  = "github.com/hashicorp/proxmox"
-    }
-    
-    ansible = {
-      version = "~> 1"
-      source = "github.com/hashicorp/ansible"
-    }
-  }
-}
-
-# -------------------------------------------------
-
 variable "ubuntu_release_full" {
   type    = string
   default = "ubuntu-22.04.3-live-server-amd64"
@@ -31,22 +15,26 @@ variable "iso_hash" {
   # https://developer.hashicorp.com/packer/plugins/builders/proxmox/iso#iso_checksum
 }
 
-variable "http_directory" {
-  type    = string
-  default = "ubuntu-init"
-}
-
 # -------------------------------------------------
 
 source "proxmox-iso" "ubuntu-generic" {
   boot_wait = "5s"
   boot_command = [
-    "c<wait>",
-    "linux /casper/vmlinuz --- autoinstall ds=\"nocloud-net;seedfrom=http://{{.HTTPIP}}:{{.HTTPPort}}/\"<wait>",
+    "<wait>c<wait>",
+    "linux /casper/vmlinuz --- autoinstall ds=\"nocloud\"",
     "<enter><wait>",
-    "initrd /casper/initrd<enter><wait>",
-    "boot<enter>"
+    "initrd /casper/initrd",
+    "<enter><wait>",
+    "boot",
+    "<enter>",
   ]
+
+  additional_iso_files {
+    iso_storage_pool = "local"
+    cd_files         = ["${path.root}/cloud-init"]
+    cd_label         = "cidata"
+    unmount          = true
+  }
 
   disks {
     disk_size    = "30G"
@@ -61,8 +49,7 @@ source "proxmox-iso" "ubuntu-generic" {
     model  = "virtio"
   }
 
-  http_directory = "${path.root}/cloud-init"
-  vm_id          = var.packer_vm_template_id
+  vm_id = var.packer_vm_template_id
 
   iso_url          = "https://releases.ubuntu.com/jammy/${var.ubuntu_release_full}.iso"
   iso_storage_pool = "local"

@@ -6,10 +6,15 @@ on:
       - main
     paths:
       - '**/*.pkr.hcl'
-      - 'ubuntu-init/**'
+      - 'templates/**'
+      - '.github/workflows/*'
   pull_request:
     branches:
       - main
+    paths:
+      - '**/*.pkr.hcl'
+      - 'templates/**'
+      - '.github/workflows/*'
   workflow_dispatch:
 
 jobs:
@@ -35,8 +40,9 @@ jobs:
         method: kubernetes
         role: ghactions
         secrets: |
-          secret/data/proxmox/api_token_id value | PM_API_TOKEN_ID ;
-          secret/data/proxmox/api_token_secret value | PM_API_TOKEN_PASS
+          secret/data/proxmox/api_token_id value | PKR_VAR_pm_api_token_id ;
+          secret/data/proxmox/api_token_secret value | PKR_VAR_pm_api_token_secret ;
+          secret/data/proxmox/ubuntu_template_vm_user value | PKR_VAR_template_user_password
 
     - name: Get ISO hash
       run: |
@@ -62,17 +68,17 @@ jobs:
     - name: Proxmox ISO prep
       run: |
         # Set env vars for step only
-        PM_API_TOKEN_ID="${{ steps.import-secrets.outputs.PM_API_TOKEN_ID }}"
-        PM_API_TOKEN_PASS="${{ steps.import-secrets.outputs.PM_API_TOKEN_PASS }}"
+        PM_API_TOKEN_ID="${{ steps.import-secrets.outputs.PKR_VAR_pm_api_token_id }}"
+        PM_API_TOKEN_PASS="${{ steps.import-secrets.outputs.PKR_VAR_pm_api_token_secret }}"
 
         bash pm_iso_prep.sh
 
     - name: Pack
       id: pack-image
       run: |
-        TEMPLATE="ubuntu.pkr.hcl"
-        packer init ./templates/$TEMPLATE
-        packer build -force -var "iso_hash=$ISO_CHECKSUM" ./templates/$TEMPLATE
+        TARGET="ubuntu"
+        packer init ./templates/$TARGET
+        packer build -force -var "iso_hash=$ISO_CHECKSUM" ./templates/$TARGET
     
     # Stop/destroy watcher
 #    - name: Mutate watcher

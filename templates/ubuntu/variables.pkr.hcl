@@ -1,1 +1,1 @@
-/home/pi/Git/packer/templates/variables.pkr.hcl
+../variables.pkr.hcl

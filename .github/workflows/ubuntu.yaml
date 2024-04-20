@@ -1,0 +1,21 @@
+name: Pack Ubuntu
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'templates/ubuntu/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'templates/ubuntu**'
+  workflow_dispatch:
+
+jobs:
+    pack-ubuntu:
+        uses: KlopfiNet/packer/.github/workflows/pack-main.yaml@main
+        with:
+          template: ubuntu
+        

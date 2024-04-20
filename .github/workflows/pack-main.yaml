@@ -1,0 +1,38 @@
+name: Pack template
+
+on:
+  workflow_call:
+    inputs:
+      template:
+        required: true
+        type: string
+
+jobs:
+  pack:
+    runs-on: kubernetes
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup `packer`
+      uses: hashicorp/setup-packer@main
+
+    - name: Vault secrets
+      id: import-secrets
+      uses: hashicorp/vault-action@v3
+      with:
+        url: ${{ vars.VAULT_ADDR }}
+        method: kubernetes
+        role: ghactions
+        secrets: |
+          secret/data/proxmox/api_token_id value | PKR_VAR_pm_api_token_id ;
+          secret/data/proxmox/api_token_secret value | PKR_VAR_pm_api_token_secret ;
+          secret/data/proxmox/ubuntu_template_vm_user value | PKR_VAR_template_user_password
+
+    - name: Pack
+      id: pack-image
+      run: |
+        TARGET="$${{ inputs.template }}"
+
+        packer init ./templates/$TARGET
+        packer build -force -var "iso_hash=$ISO_CHECKSUM" ./templates/$TARGET

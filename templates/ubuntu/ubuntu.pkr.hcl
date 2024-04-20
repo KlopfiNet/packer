@@ -1,19 +1,5 @@
-# To use vault, env vars must be set (VAULT_ADDR / VAULT_TOKEN)
-
 # REF:
 # https://tekanaid.com/posts/hashicorp-packer-build-ubuntu22-04-vmware
-
-variable "ubuntu_release_full" {
-  type    = string
-  default = "ubuntu-22.04.3-live-server-amd64"
-}
-
-variable "iso_hash" {
-  type = string
-  # Prefix with sha256:<hash>
-  # If set to 'none', execute pre-flight script first
-  # https://developer.hashicorp.com/packer/plugins/builders/proxmox/iso#iso_checksum
-}
 
 # -------------------------------------------------
 
@@ -51,10 +37,10 @@ source "proxmox-iso" "ubuntu-generic" {
 
   vm_id = var.packer_vm_template_id
 
-  iso_url          = "https://releases.ubuntu.com/jammy/${var.ubuntu_release_full}.iso"
+  iso_url          = "https://releases.ubuntu.com/jammy/${var.iso_filename}"
   iso_storage_pool = "local"
   iso_download_pve = true
-  iso_checksum     = var.iso_hash
+  iso_checksum     = "sha256:${var.iso_hash}"
   unmount_iso      = true
 
   ssh_username = "ansible"
@@ -68,7 +54,7 @@ source "proxmox-iso" "ubuntu-generic" {
   insecure_skip_tls_verify = true
 
   template_name        = "ubuntu-server-generic"
-  template_description = "${var.ubuntu_release_full} - Generated on ${timestamp()}"
+  template_description = "${var.iso_filename} - Generated on ${timestamp()}"
   task_timeout         = "10m"
 }
 

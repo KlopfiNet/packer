@@ -6,6 +6,12 @@ on:
       template:
         required: true
         type: string
+      iso-hash:
+        required: true
+        type: string
+      iso-filename:
+        required: true
+        type: string
 
 jobs:
   pack:
@@ -32,7 +38,10 @@ jobs:
     - name: Pack
       id: pack-image
       run: |
-        TARGET="$${{ inputs.template }}"
-
+        TARGET="${{ inputs.template }}"
         packer init ./templates/$TARGET
-        packer build -force -var "iso_hash=$ISO_CHECKSUM" ./templates/$TARGET
+        packer build \
+          -var "iso_hash=${{ inputs.iso-hash }}" \
+          -var "iso_filename=${{ inputs.iso-filename }}" \
+          -force \
+          ./templates/$TARGET

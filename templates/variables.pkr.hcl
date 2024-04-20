@@ -21,3 +21,11 @@ variable "packer_vm_template_id" {
   type    = number
   default = 10000
 }
+
+variable "iso_filename" {
+  type    = string
+}
+
+variable "iso_hash" {
+  type = string
+}

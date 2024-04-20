@@ -14,8 +14,22 @@ on:
   workflow_dispatch:
 
 jobs:
-    pack-ubuntu:
-        uses: KlopfiNet/packer/.github/workflows/pack-main.yaml@main
-        with:
-          template: ubuntu
-        
+  get-iso-info:
+    runs-on: ubuntu-latest
+    outputs:
+      iso-hash: ${{ steps.release-info.outputs.hash }}
+      iso-filename: ${{ steps.release-info.outputs.filename }}
+    steps:
+    - name: Determine Ubuntu ISO releases
+      id: release-info
+      run: |
+        shas256sums=$(curl https://releases.ubuntu.com/jammy/SHA256SUMS | grep server)
+        echo "hash=$(echo $shas256sums | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+        echo "filename=$(echo $shas256sums | awk '{print $2}' | sed 's/*//g')" >> "$GITHUB_OUTPUT"
+  pack-ubuntu:
+    uses: KlopfiNet/packer/.github/workflows/pack-main.yaml@main
+    needs: get-iso-info
+    with:
+      template: ubuntu
+      iso-hash: ${{ needs.get-iso-info.outputs.iso-hash }}
+      iso-filename: ${{ needs.get-iso-info.outputs.iso-filename }}

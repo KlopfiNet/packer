@@ -1,15 +1,3 @@
-# To use vault, env vars must be set (VAULT_ADDR / VAULT_TOKEN)
-
-# REF:
-# https://tekanaid.com/posts/hashicorp-packer-build-ubuntu22-04-vmware
-
-variable "iso_hash" {
-  type    = string
-  default = "eb096f0518e310f722d5ebd4c69f0322df4fc152c6189f93c5c797dc25f3d2e1"
-}
-
-# -------------------------------------------------
-
 source "proxmox-iso" "rocky-generic" {
   boot_wait = "5s"
   boot_command = [
@@ -42,10 +30,10 @@ source "proxmox-iso" "rocky-generic" {
 
   vm_id          = 10311
 
-  iso_url          = "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.3-x86_64-boot.iso"
+  iso_url          = "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/${var.iso_filename}"
   iso_storage_pool = "local"
   iso_download_pve = true
-  iso_checksum     = var.iso_hash
+  iso_checksum     = "sha256:${var.iso_hash}"
   unmount_iso      = true
 
   ssh_username = "ansible"

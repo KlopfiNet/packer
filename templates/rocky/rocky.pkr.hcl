@@ -50,7 +50,7 @@ source "proxmox-iso" "rocky-generic" {
 
   template_name        = "rocky-server-generic"
   template_description = "Rocky 9.3 - Generated on ${timestamp()}"
-  task_timeout         = "10m"
+  task_timeout         = "25m"
 }
 
 build {

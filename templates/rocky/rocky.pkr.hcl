@@ -1,27 +1,29 @@
 source "proxmox-iso" "rocky-generic" {
   boot_wait = "5s"
   boot_command = [
-    "e<down><down><end>",
-    "<bs><bs><bs><bs><bs>",
-    "inst.text inst.ks=cdrom:/ks.cfg",
-    "<leftCtrlOn>x<leftCtrlOff>"
+    "<tab><bs><bs><bs><bs><bs>",
+    "inst.text inst.ks=cdrom:/ks.cfg<wait><enter>",
   ]
   
   additional_iso_files {
     iso_storage_pool = "local"
-    cd_files         = ["${path.root}/ks"]
+    cd_files         = ["${path.root}/ks/ks.cfg"]
     cd_label         = "cidata"
     unmount          = true
   }
 
+  # Rocky doesn't detect disks with LSI
+  scsi_controller = "virtio-scsi-single"
   disks {
     disk_size    = "30G"
     storage_pool = "vms"
     type         = "scsi"
   }
 
-  memory = 1536 #1024
-  # Required, as packer only supplements 512MB by default, leading to kernel panics
+  # Memory must be >512MB and cpu_type = x86-64*
+  memory   = 2048 #1024
+  cpu_type = "x86-64-v2-AES"
+  sockets  = 2
 
   network_adapters {
     bridge = "vmbr0"
@@ -53,12 +55,6 @@ source "proxmox-iso" "rocky-generic" {
 
 build {
   sources = ["source.proxmox-iso.rocky-generic"]
-
-  provisioner "shell" {
-    inline = [
-      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo -n '.'; sleep 1; done"
-    ]
-  }
 
   provisioner "ansible" {
     playbook_file = "${path.root}/../playbooks/provision.yaml"

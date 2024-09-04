@@ -38,23 +38,10 @@ jobs:
           secret/data/proxmox/api_token_secret value | PKR_VAR_pm_api_token_secret ;
           secret/data/proxmox/ubuntu_template_vm_user value | PKR_VAR_template_user_password
 
-    - name: debug
-      run: |
-        echo $(pwd)
-        for i in $(find . -type d | grep -v ".git"); do
-          echo $i
-          ls $i
-          echo "-----------"
-        done
-
-        echo "LS /"
-        ls /
-
-        [ -d /tmp ] && echo "/tmp exists" || echo "/tmp does NOT exist"
-
     - name: Pack
       id: pack-image
       run: |
+        export PACKER_LOG=1
         TARGET="${{ inputs.template }}"
         packer init ./templates/$TARGET
         packer build \

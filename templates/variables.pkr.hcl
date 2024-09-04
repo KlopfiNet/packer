@@ -17,15 +17,14 @@ variable "pm_api_url" {
   default = "https://10.0.1.10:8006/api2/json"
 }
 
-variable "packer_vm_template_id" {
-  type    = number
-  default = 10000
-}
-
 variable "iso_filename" {
-  type    = string
+  type = string
 }
 
 variable "iso_hash" {
+  type = string
+}
+
+variable "vm_id" {
   type = string
 }

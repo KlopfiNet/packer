@@ -4,7 +4,7 @@ source "proxmox-iso" "rocky-generic" {
     "<tab><bs><bs><bs><bs><bs>",
     "inst.text inst.ks=cdrom:/ks.cfg<wait><enter>",
   ]
-  
+
   additional_iso_files {
     iso_storage_pool = "local"
     cd_files         = ["${path.root}/ks/ks.cfg"]
@@ -30,7 +30,7 @@ source "proxmox-iso" "rocky-generic" {
     model  = "virtio"
   }
 
-  vm_id          = 10311
+  vm_id = var.vm_id
 
   iso_url          = "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/${var.iso_filename}"
   iso_storage_pool = "local"

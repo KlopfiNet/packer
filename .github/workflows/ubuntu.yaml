@@ -33,3 +33,4 @@ jobs:
       template: ubuntu
       iso-hash: ${{ needs.get-iso-info.outputs.iso-hash }}
       iso-filename: ${{ needs.get-iso-info.outputs.iso-filename }}
+      vm-id: 1011

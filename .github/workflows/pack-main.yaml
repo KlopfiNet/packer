@@ -12,6 +12,9 @@ on:
       iso-filename:
         required: true
         type: string
+      vm-id:
+        required: true
+        type: number
 
 jobs:
   pack:
@@ -57,5 +60,6 @@ jobs:
         packer build \
           -var "iso_hash=${{ inputs.iso-hash }}" \
           -var "iso_filename=${{ inputs.iso-filename }}" \
+          -var "vm_id=${{ inputs.vm-id }}" \
           -force \
           ./templates/$TARGET

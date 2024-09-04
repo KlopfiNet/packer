@@ -35,7 +35,7 @@ source "proxmox-iso" "ubuntu-generic" {
     model  = "virtio"
   }
 
-  vm_id = var.packer_vm_template_id
+  vm_id = var.vm_id
 
   iso_url          = "https://releases.ubuntu.com/jammy/${var.iso_filename}"
   iso_storage_pool = "local"

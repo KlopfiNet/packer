@@ -1,0 +1,39 @@
+name: Pack Ubuntu
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'templates/rocky/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'templates/rocky/**'
+  workflow_dispatch:
+
+jobs:
+  get-iso-info:
+    runs-on: ubuntu-latest
+    outputs:
+      iso-hash: ${{ steps.release-info.outputs.hash }}
+      iso-filename: ${{ steps.release-info.outputs.filename }}
+    steps:
+    - name: Determine Rocky ISO releases
+      id: release-info
+      run: |
+        CHECKSUM_URL=https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9-latest-x86_64-boot.iso.CHECKSUM
+        SHA256SUM=$(curl $CHECKSUM_URL | cut -d "=" -f 2 | xargs)
+        echo "Got sum: $SHA256SUM"
+
+        echo "hash=$(echo $SHA256SUM) >> "$GITHUB_OUTPUT"
+        echo "filename=Rocky-9-latest-x86_64-boot.iso" >> "$GITHUB_OUTPUT"
+  pack-ubuntu:
+    uses: KlopfiNet/packer/.github/workflows/pack-main.yaml@main
+    needs: get-iso-info
+    with:
+      template: rocky
+      iso-hash: ${{ needs.get-iso-info.outputs.iso-hash }}
+      iso-filename: ${{ needs.get-iso-info.outputs.iso-filename }}
+      vm-id: 1010

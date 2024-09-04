@@ -23,8 +23,8 @@ jobs:
     - name: Determine Rocky ISO releases
       id: release-info
       run: |
-        CHECKSUM_URL=https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9-latest-x86_64-boot.iso.CHECKSUM
-        SHA256SUM=$(curl $CHECKSUM_URL | cut -d "=" -f 2 | xargs)
+        CHECKSUM=$(curl -s https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9-latest-x86_64-boot.iso.CHECKSUM)
+        SHA256SUM=$(echo $CHECKSUM | rev | cut -d " " -f 1)
         echo "Got sum: $SHA256SUM"
 
         echo "hash=$(echo $SHA256SUM) >> "$GITHUB_OUTPUT"

@@ -18,6 +18,7 @@
       name: "{{ item }}" 
       state: present
     with_items: "{{ packages }}"
+    ignore_errors: yes
   
   - name: Start and enable guest agent
     ansible.builtin.service:

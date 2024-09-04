@@ -27,7 +27,7 @@ jobs:
         SHA256SUM=$(echo $CHECKSUM | rev | cut -d " " -f 1)
         echo "Got sum: $SHA256SUM"
 
-        echo "hash=$(echo $SHA256SUM) >> "$GITHUB_OUTPUT"
+        echo "hash=$(echo $SHA256SUM)" >> "$GITHUB_OUTPUT"
         echo "filename=Rocky-9-latest-x86_64-boot.iso" >> "$GITHUB_OUTPUT"
   pack-ubuntu:
     uses: KlopfiNet/packer/.github/workflows/pack-main.yaml@main

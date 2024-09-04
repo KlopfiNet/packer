@@ -1,4 +1,4 @@
-name: Pack Ubuntu
+name: Pack Rocky
 
 on:
   push:

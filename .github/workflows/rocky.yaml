@@ -24,7 +24,7 @@ jobs:
       id: release-info
       run: |
         CHECKSUM=$(curl -s https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9-latest-x86_64-boot.iso.CHECKSUM)
-        SHA256SUM=$(echo $CHECKSUM | rev | cut -d " " -f 1)
+        SHA256SUM=$(echo $CHECKSUM | rev | cut -d " " -f 1 | rev)
         echo "Got sum: $SHA256SUM"
 
         echo "hash=$(echo $SHA256SUM)" >> "$GITHUB_OUTPUT"
